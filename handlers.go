@@ -47,6 +47,17 @@ func receiveHandler(producer *kafka.Producer, serializer Serializer) func(c *gin
 			return
 		}
 
+		// process tenant
+		logrus.Info(c.Request.Header)
+
+		tenantId := c.Request.Header.Get("X-Scope-OrgID")
+		if tenantId == "" {
+			c.AbortWithStatus(http.StatusUnauthorized)
+			logrus.Error("Can't decode tetant id")
+			return
+		}
+
+
 		var req prompb.WriteRequest
 		if err := proto.Unmarshal(reqBuf, &req); err != nil {
 			c.AbortWithStatus(http.StatusBadRequest)
@@ -54,7 +65,7 @@ func receiveHandler(producer *kafka.Producer, serializer Serializer) func(c *gin
 			return
 		}
 
-		metricsPerTopic, err := processWriteRequest(&req)
+		metricsPerTopic, err := processWriteRequest(&req, tenantId)
 		if err != nil {
 			c.AbortWithStatus(http.StatusInternalServerError)
 			logrus.WithError(err).Error("couldn't process write request")

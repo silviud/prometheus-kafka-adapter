@@ -34,7 +34,7 @@ type Serializer interface {
 }
 
 // Serialize generates the JSON representation for a given Prometheus metric.
-func Serialize(s Serializer, req *prompb.WriteRequest) (map[string][][]byte, error) {
+func Serialize(s Serializer, req *prompb.WriteRequest, orgId string) (map[string][][]byte, error) {
 	result := make(map[string][][]byte)
 
 	for _, ts := range req.Timeseries {
@@ -42,6 +42,7 @@ func Serialize(s Serializer, req *prompb.WriteRequest) (map[string][][]byte, err
 
 		for _, l := range ts.Labels {
 			labels[string(model.LabelName(l.Name))] = string(model.LabelValue(l.Value))
+			labels["X-Scope-OrgID"] = orgId  // X-Scope-OrgID
 		}
 
 		t := topic(labels)

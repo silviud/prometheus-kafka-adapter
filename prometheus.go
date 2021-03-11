@@ -19,7 +19,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func processWriteRequest(req *prompb.WriteRequest) (map[string][][]byte, error) {
+func processWriteRequest(req *prompb.WriteRequest, orgId string) (map[string][][]byte, error) {
 	logrus.WithField("var", req).Debugln()
-	return Serialize(serializer, req)
+	return Serialize(serializer, req, orgId)
 }
